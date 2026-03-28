@@ -2,38 +2,45 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "vivekxdevv"
-        IMAGE_NAME = "node-devops-app"
+        DOCKER_IMAGE = 'vivekxdevv/nodejs-devops-app'
     }
 
     stages {
-        stage('Clone') {
+
+        stage('Clone Code') {
             steps {
-                git 'https://github.com/your-username/repo.git'
+                git 'https://github.com/Vivek-x-dev/nodejs-devops-project.git'
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_HUB/$IMAGE_NAME:latest .'
+                sh 'docker build -t $DOCKER_IMAGE:latest .'
             }
         }
 
-        stage('Push Image') {
+        stage('Push to Docker Hub') {
             steps {
-                sh 'docker push $DOCKER_HUB/$IMAGE_NAME:latest'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE:latest'
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to EC2') {
             steps {
-                sh '''
-                ssh ubuntu@EC2-IP "
-                docker pull $DOCKER_HUB/$IMAGE_NAME:latest &&
-                docker-compose -f docker-compose.prod.yml up -d
-                "
-                '''
+                sshagent(['ec2-ssh']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@44.193.28.13 << EOF
+                    docker pull vivekxdevv/nodejs-devops-app:latest
+                    docker-compose -f ~/nodejs-devops-project/docker-compose.prod.yml down
+                    docker-compose -f ~/nodejs-devops-project/docker-compose.prod.yml up -d
+                    EOF
+                    '''
+                }
             }
         }
+
     }
 }
