@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "yourdockerhubusername"
+        DOCKER_HUB = "vivekxdevv"
         IMAGE_NAME = "node-devops-app"
     }
 

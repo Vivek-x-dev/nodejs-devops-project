@@ -2,7 +2,7 @@ version: '3'
 
 services:
   app:
-    image: yourdockerhubusername/node-devops-app:latest
+    build: .
     container_name: node-app
     ports:
       - "3000:3000"

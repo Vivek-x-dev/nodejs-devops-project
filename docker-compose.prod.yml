@@ -2,8 +2,10 @@ version: '3'
 
 services:
   app:
-    image: yourdockerhubusername/node-devops-app:latest
+    image: vivekxdevv/nodejs-devops-app:latest
     container_name: node-app
+    networks:
+      - devops-network
 
   nginx:
     image: nginx:latest
@@ -14,3 +16,8 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
+    networks:
+      - devops-network
+
+networks:
+  devops-network:
